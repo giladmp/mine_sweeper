@@ -6,10 +6,14 @@ const FLAG = '🚩'
 var gBoard
 var gLevel = {
     size: 4,
-    mines: 2
+    mines: 5
 }
-var gGame
-
+var gGame = {
+    isOn: false,
+    shownCount: 0,
+    markedCount: 0,
+    secsPassed: 0
+}
 
 function initGame() {
     buildBoard(gLevel.size, gLevel.mines)
@@ -31,21 +35,20 @@ function buildBoard(size, mines) {
             board[i].push(cell)
         }
     }
-    generateMines(board)
+    generateMines(board, mines)
     setMinesNegsCount(board)
-    console.table(board)
     gBoard = board
 }
 
-function generateMines(board) {
+function generateMines(board, mines) {
     var minesCounter = 0
-    while (minesCounter < gLevel.mines) {
-        var i = Math.floor(Math.random() * gLevel.size) 
-        var j = Math.floor(Math.random() * gLevel.size)
+    while (minesCounter < mines) {
+        var i = Math.floor(Math.random() * board.length)
+        var j = Math.floor(Math.random() * board.length)
         if (!board[i][j].isMine) {
             board[i][j].isMine = true
             minesCounter++
-        } 
+        }
     }
     return board
 }
@@ -71,14 +74,16 @@ function setMinesNegsCount(board) {
 }
 
 function renderBoard(board) {
+    renderTimer()
+
     var elBoard = document.querySelector('.board-container')
     elBoard.innerHTML = ''
     for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board.length; j++) {
+        for (var j = 0; j < board[i].length; j++) {
             var elCell = document.createElement('div')
             elCell.classList.add('cell')
             elCell.setAttribute('id', `${i}-${j}`)
-            elCell.addEventListener('click', () => {cellClicked(event.target.id)})
+            elCell.addEventListener('click', () => { cellClicked(event.target.id) })
             if (board[i][j].isShown) {
                 if (board[i][j].isMine) {
                     elCell.innerText = MINE
@@ -95,12 +100,30 @@ function renderBoard(board) {
     }
 }
 
-function cellClicked(id) {
-    var coords = id.split('-')
+function cellClicked(cellId) {
+    setStopWatch()
+    var coords = cellId.split('-')
     if (!gBoard[coords[0]][coords[1].isShown]) {
         gBoard[coords[0]][coords[1]].isShown = true
     }
     renderBoard(gBoard)
+}
+
+function setStopWatch() {
+    if (!gGame.secsPassed) {
+        gGame.secsPassed++
+        setInterval(() => {
+            gGame.secsPassed++
+            renderBoard(gBoard)
+        }, 1000)
+    }
+}
+
+function renderTimer() {
+    var elTimer = document.querySelector('.timer')
+    var timerStr = gGame.secsPassed.toString()
+    var paddedStr = timerStr.padStart(3, '0')
+    elTimer.innerText = paddedStr 
 }
 
 function cellMarked(elCell) { }

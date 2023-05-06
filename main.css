@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -7,17 +11,40 @@ body {
 .board-container {
     display: flex;
     flex-wrap: wrap;
-    width: 208px;
+    width: 120px;
     background-color: black;
 }
 
 .cell {
+    flex-basis: 25%;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50px;
-    width: 50px;
+    height: 30px;
+    width: 30px;
     background-color: grey;
     border: 1px solid black;
 }
 
+.dashboard-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 120px;
+    height: 50px;
+    background-color: rgb(191, 150, 192);
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.timer {
+    background-color: aliceblue;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
