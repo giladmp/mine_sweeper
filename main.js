@@ -4,12 +4,13 @@ const MINE = '💣'
 const FLAG = '🚩'
 
 var gBoard
+var gTimer
 var gLevel = {
     size: 4,
-    mines: 5
+    mines: 2
 }
 var gGame = {
-    isOn: false,
+    isOn: true,
     shownCount: 0,
     markedCount: 0,
     secsPassed: 0
@@ -74,8 +75,6 @@ function setMinesNegsCount(board) {
 }
 
 function renderBoard(board) {
-    renderTimer()
-
     var elBoard = document.querySelector('.board-container')
     elBoard.innerHTML = ''
     for (var i = 0; i < board.length; i++) {
@@ -101,21 +100,29 @@ function renderBoard(board) {
 }
 
 function cellClicked(cellId) {
-    setStopWatch()
-    var coords = cellId.split('-')
-    if (!gBoard[coords[0]][coords[1].isShown]) {
-        gBoard[coords[0]][coords[1]].isShown = true
-    }
-    renderBoard(gBoard)
-}
-
-function setStopWatch() {
-    if (!gGame.secsPassed) {
-        gGame.secsPassed++
-        setInterval(() => {
+    var cellCoords = cellId.split('-')
+    if (!gGame.isOn) {
+        return
+    } else if (gGame.isOn) {
+        //start timer
+        if (!gGame.secsPassed) {
             gGame.secsPassed++
+            renderTimer()
+            gTimer = setInterval(() => {
+                gGame.secsPassed++
+                renderTimer()
+            }, 1000)
+        }
+        //show cell
+        if (!gBoard[cellCoords[0]][cellCoords[1]].isShown) {
+            gBoard[cellCoords[0]][cellCoords[1]].isShown = true
             renderBoard(gBoard)
-        }, 1000)
+        }
+
+    }
+    if (gBoard[cellCoords[0]][cellCoords[1]].isMine) {
+        clearInterval(gTimer)
+        console.log('Game Over')
     }
 }
 
@@ -123,11 +130,17 @@ function renderTimer() {
     var elTimer = document.querySelector('.timer')
     var timerStr = gGame.secsPassed.toString()
     var paddedStr = timerStr.padStart(3, '0')
-    elTimer.innerText = paddedStr 
+    elTimer.innerText = paddedStr
 }
 
 function cellMarked(elCell) { }
 
-function checkGameOver() { }
+function checkGameOver(cellCoords) {
+    // if (gBoard[cellCoords[0]][cellCoords[1]].isMine) {
+    //     console.log('GAME OVER')
+    //     gGame.isOn = false
+    //     setStopWatch()
+    // }
+}
 
 function expandShown(board, elCell, i, j) { }
