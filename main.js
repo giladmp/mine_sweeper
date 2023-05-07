@@ -17,6 +17,8 @@ var gGame = {
 }
 
 function initGame() {
+    gGame.markedCount = gLevel.mines
+    renderFlagsCounter()
     buildBoard(gLevel.size, gLevel.mines)
     renderBoard(gBoard)
 }
@@ -83,16 +85,17 @@ function renderBoard(board) {
             elCell.classList.add('cell')
             elCell.setAttribute('id', `${i}-${j}`)
             elCell.addEventListener('click', () => { cellClicked(event.target.id) })
+            elCell.addEventListener('contextmenu', () => { cellRightClicked(event) })
             if (board[i][j].isShown) {
                 if (board[i][j].isMine) {
                     elCell.innerText = MINE
                 }
-                if (board[i][j].isMarked) {
-                    elCell.innerText = FLAG
-                }
                 if (board[i][j].minesAroundCount > 0) {
                     elCell.innerText = board[i][j].minesAroundCount
                 }
+            }
+            if (board[i][j].isMarked) {
+                elCell.innerText = FLAG
             }
             elBoard.appendChild(elCell)
         }
@@ -101,29 +104,52 @@ function renderBoard(board) {
 
 function cellClicked(cellId) {
     var cellCoords = cellId.split('-')
+    var cell = gBoard[cellCoords[0]][cellCoords[1]]
     if (!gGame.isOn) {
         return
     } else if (gGame.isOn) {
         //start timer
-        if (!gGame.secsPassed) {
-            gGame.secsPassed++
-            renderTimer()
-            gTimer = setInterval(() => {
-                gGame.secsPassed++
-                renderTimer()
-            }, 1000)
-        }
+        startTimer()
         //show cell
-        if (!gBoard[cellCoords[0]][cellCoords[1]].isShown) {
-            gBoard[cellCoords[0]][cellCoords[1]].isShown = true
+        if (!cell.isShown && !cell.isMarked) {
+            cell.isShown = true
             renderBoard(gBoard)
         }
-
     }
-    if (gBoard[cellCoords[0]][cellCoords[1]].isMine) {
+    if (cell.isMine && !cell.isMarked) {
         clearInterval(gTimer)
         console.log('Game Over')
+        gGame.isOn = false
     }
+}
+
+function cellRightClicked(event) {
+    event.preventDefault()
+    if (!gGame.isOn) {
+        return
+    } else if (gGame.isOn) {
+        startTimer()
+        var cellCoords = event.target.id.split('-')
+        var cell = gBoard[cellCoords[0]][cellCoords[1]]
+        if (!cell.isMarked && !cell.isShown) {
+            cell.isMarked = true
+            gGame.markedCount--
+            renderFlagsCounter()
+            renderBoard(gBoard)
+        } else if (cell.isMarked && !cell.isShown) {
+            cell.isMarked = false
+            gGame.markedCount++
+            renderFlagsCounter()
+            renderBoard(gBoard)
+        }   
+     }
+}
+
+function renderFlagsCounter() {
+    var elCounter = document.querySelector('.flags-counter')
+    var flagsStr = gGame.markedCount.toString()
+    var paddedStr = flagsStr.padStart(2, '0')
+    elCounter.innerText = paddedStr
 }
 
 function renderTimer() {
@@ -141,6 +167,17 @@ function checkGameOver(cellCoords) {
     //     gGame.isOn = false
     //     setStopWatch()
     // }
+}
+
+function startTimer() {
+    if (!gGame.secsPassed) {
+        gGame.secsPassed++
+        renderTimer()
+        gTimer = setInterval(() => {
+            gGame.secsPassed++
+            renderTimer()
+        }, 1000)
+    }
 }
 
 function expandShown(board, elCell, i, j) { }
