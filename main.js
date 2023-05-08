@@ -17,6 +17,10 @@ var gGame = {
 }
 
 function initGame() {
+    clearInterval(gTimer)
+    gGame.secsPassed = 0
+    renderTimer()
+    gGame.isOn = true
     gGame.markedCount = gLevel.mines
     renderFlagsCounter()
     buildBoard(gLevel.size, gLevel.mines)
@@ -94,6 +98,9 @@ function renderBoard(board) {
                     elCell.innerText = board[i][j].minesAroundCount
                 }
             }
+            if (board[i][j].isShown && !board[i][j].minesAroundCount && !board[i][j].isMine) {
+                elCell.classList.add('empty')
+            }
             if (board[i][j].isMarked) {
                 elCell.innerText = FLAG
             }
@@ -113,7 +120,6 @@ function cellClicked(cellId) {
         //show cell
         if (!cell.isShown && !cell.isMarked) {
             cell.isShown = true
-            renderBoard(gBoard)
         }
     }
     if (cell.isMine && !cell.isMarked) {
@@ -121,6 +127,8 @@ function cellClicked(cellId) {
         console.log('Game Over')
         gGame.isOn = false
     }
+    checkGameOver()
+    renderBoard(gBoard)
 }
 
 function cellRightClicked(event) {
@@ -141,8 +149,9 @@ function cellRightClicked(event) {
             gGame.markedCount++
             renderFlagsCounter()
             renderBoard(gBoard)
-        }   
-     }
+        }
+        checkGameOver()
+    }
 }
 
 function renderFlagsCounter() {
@@ -159,14 +168,25 @@ function renderTimer() {
     elTimer.innerText = paddedStr
 }
 
-function cellMarked(elCell) { }
-
-function checkGameOver(cellCoords) {
-    // if (gBoard[cellCoords[0]][cellCoords[1]].isMine) {
-    //     console.log('GAME OVER')
-    //     gGame.isOn = false
-    //     setStopWatch()
-    // }
+function checkGameOver() {
+    var minesNotMarked = gLevel.mines
+    var nonMinesNotRevealed = gLevel.size ** 2 - gLevel.mines
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
+            var cell = gBoard[i][j]
+            if (cell.isMine && cell.isMarked) {
+                minesNotMarked--
+            }
+            if (!cell.isMine && cell.isShown) {
+                nonMinesNotRevealed--
+            }
+        }
+    }
+    if (minesNotMarked === 0 && nonMinesNotRevealed === 0) {
+        clearInterval(gTimer)
+        console.log('You Win!')
+        gGame.isOn = false
+    }
 }
 
 function startTimer() {
