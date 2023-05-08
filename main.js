@@ -6,7 +6,7 @@ const FLAG = '🚩'
 var gBoard
 var gTimer
 var gLevel = {
-    size: 6,
+    size: 4,
     mines: 2
 }
 var gGame = {
@@ -244,5 +244,11 @@ function expandShown(coords) {
             cellClicked([coords[0], coords[1] - 1])
         }
     }, 50)
+}
+
+function setGameLevel(size, mines) {
+    gLevel.size = size
+    gLevel.mines = mines
+    initGame()
 }
 
