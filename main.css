@@ -4,6 +4,7 @@
 
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -11,12 +12,13 @@ body {
 .board-container {
     display: flex;
     flex-wrap: wrap;
-    width: 120px;
-    background-color: black;
+    justify-content: center;
+    align-items: center;
+    width: calc(30px * var(--row-size));
+    height: calc(30px * var(--col-size));
 }
 
 .cell {
-    flex-basis: 25%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -60,4 +62,9 @@ body {
 
 .empty {
     background-color: aqua;
+}
+
+.buttons-container {
+    display: flex;
+    flex-direction: row;
 }

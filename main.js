@@ -6,8 +6,8 @@ const FLAG = '🚩'
 var gBoard
 var gTimer
 var gLevel = {
-    size: 4,
-    mines: 6
+    size: 6,
+    mines: 2
 }
 var gGame = {
     isOn: true,
@@ -20,11 +20,18 @@ function initGame() {
     clearInterval(gTimer)
     gGame.secsPassed = 0
     renderTimer()
-    gGame.isOn = true
     gGame.markedCount = gLevel.mines
     renderFlagsCounter()
+    gGame.isOn = true
+    adjustCellsPerRow()
     buildBoard(gLevel.size)
     renderBoard(gBoard)
+}
+
+function adjustCellsPerRow() {
+    var elBoard = document.querySelector('.board-container')
+    elBoard.style.setProperty('--row-size', gLevel.size)
+    elBoard.style.setProperty('--col-size', gLevel.size)
 }
 
 function buildBoard(size) {
@@ -55,7 +62,7 @@ function generateMines(coords) {
             gBoard[i][j].isMine = true
             minesCounter++
         }
-        
+
     }
 }
 
