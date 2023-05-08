@@ -22,6 +22,7 @@ function initGame() {
     renderTimer()
     gGame.markedCount = gLevel.mines
     renderFlagsCounter()
+    clearTexts()
     gGame.isOn = true
     adjustCellsPerRow()
     buildBoard(gLevel.size)
@@ -62,7 +63,6 @@ function generateMines(coords) {
             gBoard[i][j].isMine = true
             minesCounter++
         }
-
     }
 }
 
@@ -109,6 +109,9 @@ function renderBoard(board) {
             if (board[i][j].isMarked) {
                 elCell.innerText = FLAG
             }
+            if (board[i][j].justBombed) {
+                elCell.classList.add('red')
+            }
             elBoard.appendChild(elCell)
         }
     }
@@ -133,8 +136,10 @@ function cellClicked(coords) {
     }
     if (cell.isMine && !cell.isMarked) {
         clearInterval(gTimer)
-        console.log('Game Over')
         gGame.isOn = false
+        renderGameOver()
+        cell.justBombed = true
+        showAllMines()
     }
     checkGameOver()
     renderBoard(gBoard)
@@ -195,7 +200,7 @@ function checkGameOver() {
     }
     if (minesNotMarked === 0 && nonMinesNotRevealed === 0) {
         clearInterval(gTimer)
-        console.log('You Win!')
+        renderYouWin()
         gGame.isOn = false
     }
 }
@@ -207,7 +212,6 @@ function startTimer() {
         gGame.secsPassed++
         renderTimer()
     }, 1000)
-
 }
 
 function getCoords(id) {
@@ -252,3 +256,29 @@ function setGameLevel(size, mines) {
     initGame()
 }
 
+function showAllMines() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard.length; j++) {
+            if (gBoard[i][j].isMine) {
+                gBoard[i][j].isShown = true
+            }
+        }
+    }
+}
+
+function renderGameOver() {
+    var elText = document.querySelector('.game-over')
+    elText.innerText = 'Game Over'
+}
+
+function renderYouWin() {
+    var elText = document.querySelector('.you-win')
+    elText.innerText = 'You Win!'
+}
+
+function clearTexts() {
+    var elWinText = document.querySelector('.you-win')
+    elWinText.innerText = ''
+    var elLoseText = document.querySelector('.game-over')
+    elLoseText.innerText = ''
+}
