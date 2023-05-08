@@ -7,7 +7,7 @@ var gBoard
 var gTimer
 var gLevel = {
     size: 4,
-    mines: 2
+    mines: 1
 }
 var gGame = {
     isOn: true,
@@ -88,7 +88,7 @@ function renderBoard(board) {
             var elCell = document.createElement('div')
             elCell.classList.add('cell')
             elCell.setAttribute('id', `${i}-${j}`)
-            elCell.addEventListener('click', () => { cellClicked(event.target.id) })
+            elCell.addEventListener('click', () => { cellClicked(getCoords(event.target.id)) })
             elCell.addEventListener('contextmenu', () => { cellRightClicked(event) })
             if (board[i][j].isShown) {
                 if (board[i][j].isMine) {
@@ -109,17 +109,17 @@ function renderBoard(board) {
     }
 }
 
-function cellClicked(cellId) {
-    var cellCoords = cellId.split('-')
-    var cell = gBoard[cellCoords[0]][cellCoords[1]]
+function cellClicked(coords) {
+    var cell = gBoard[coords[0]][coords[1]]
     if (!gGame.isOn) {
         return
     } else if (gGame.isOn) {
-        //start timer
         startTimer()
-        //show cell
         if (!cell.isShown && !cell.isMarked) {
             cell.isShown = true
+            if (!cell.minesAroundCount && !cell.isMine) {
+                expandShown(coords)
+            }
         }
     }
     if (cell.isMine && !cell.isMarked) {
@@ -200,4 +200,39 @@ function startTimer() {
     }
 }
 
-function expandShown(board, elCell, i, j) { }
+function getCoords(id) {
+    var coords = id.split('-')
+    coords[0] = +coords[0]
+    coords[1] = +coords[1]
+    return coords
+}
+
+function expandShown(coords) {
+    setTimeout(() => {
+        if (coords[0] !== 0 && coords[1] !== 0) {
+            cellClicked([coords[0] - 1, coords[1] - 1])
+        }
+        if (coords[0] !== 0) {
+            cellClicked([coords[0] - 1, coords[1]])
+        }
+        if (coords[0] !== 0 && coords[1] !== gBoard.length - 1) {
+            cellClicked([coords[0] - 1, coords[1] + 1])
+        }
+        if (coords[1] !== gBoard.length - 1) {
+            cellClicked([coords[0], coords[1] + 1])
+        }
+        if (coords[0] !== gBoard.length - 1 && coords[1] !== gBoard.length - 1) {
+            cellClicked([coords[0] + 1, coords[1] + 1])
+        }
+        if (coords[0] !== gBoard.length - 1) {
+            cellClicked([coords[0] + 1, coords[1]])
+        }
+        if (coords[0] !== gBoard.length - 1 && coords[1] !== 0) {
+            cellClicked([coords[0] + 1, coords[1] - 1])
+        }
+        if (coords[1] !== 0) {
+            cellClicked([coords[0], coords[1] - 1])
+        }
+    }, 50)
+}
+
