@@ -7,7 +7,7 @@ var gBoard
 var gTimer
 var gLevel = {
     size: 4,
-    mines: 1
+    mines: 6
 }
 var gGame = {
     isOn: true,
@@ -23,11 +23,11 @@ function initGame() {
     gGame.isOn = true
     gGame.markedCount = gLevel.mines
     renderFlagsCounter()
-    buildBoard(gLevel.size, gLevel.mines)
+    buildBoard(gLevel.size)
     renderBoard(gBoard)
 }
 
-function buildBoard(size, mines) {
+function buildBoard(size) {
     var board = []
     for (var i = 0; i < size; i++) {
         var row = []
@@ -42,42 +42,40 @@ function buildBoard(size, mines) {
             board[i].push(cell)
         }
     }
-    generateMines(board, mines)
-    setMinesNegsCount(board)
     gBoard = board
 }
 
-function generateMines(board, mines) {
+function generateMines(coords) {
     var minesCounter = 0
-    while (minesCounter < mines) {
-        var i = Math.floor(Math.random() * board.length)
-        var j = Math.floor(Math.random() * board.length)
-        if (!board[i][j].isMine) {
-            board[i][j].isMine = true
+    while (minesCounter < gLevel.mines) {
+        var i = Math.floor(Math.random() * gBoard.length)
+        var j = Math.floor(Math.random() * gBoard.length)
+        if (i === coords[0] && j === coords[1]) continue
+        if (!gBoard[i][j].isMine) {
+            gBoard[i][j].isMine = true
             minesCounter++
         }
+        
     }
-    return board
 }
 
-function setMinesNegsCount(board) {
-    for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board[i].length; j++) {
-            if (!board[i][j].isMine) {
+function setMinesNegsCount() {
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[i].length; j++) {
+            if (!gBoard[i][j].isMine) {
                 var minesNegsCount = null
-                if (j !== (board[i].length - 1) && board[i][j + 1].isMine) minesNegsCount++
-                if (i !== (board.length - 1) && (j !== board[i].length - 1) && board[i + 1][j + 1].isMine) minesNegsCount++
-                if (i !== (board[i].length - 1) && board[i + 1][j].isMine) minesNegsCount++
-                if (i !== (board.length - 1) && j !== 0 && board[i + 1][j - 1].isMine) minesNegsCount++
-                if (j !== 0 && board[i][j - 1].isMine) minesNegsCount++
-                if (j !== 0 && i !== 0 && board[i - 1][j - 1].isMine) minesNegsCount++
-                if (i !== 0 && board[i - 1][j].isMine) minesNegsCount++
-                if (i !== 0 && j !== (board[i].length - 1) && board[i - 1][j + 1].isMine) minesNegsCount++
-                board[i][j].minesAroundCount = minesNegsCount
+                if (j !== (gBoard[i].length - 1) && gBoard[i][j + 1].isMine) minesNegsCount++
+                if (i !== (gBoard.length - 1) && (j !== gBoard[i].length - 1) && gBoard[i + 1][j + 1].isMine) minesNegsCount++
+                if (i !== (gBoard[i].length - 1) && gBoard[i + 1][j].isMine) minesNegsCount++
+                if (i !== (gBoard.length - 1) && j !== 0 && gBoard[i + 1][j - 1].isMine) minesNegsCount++
+                if (j !== 0 && gBoard[i][j - 1].isMine) minesNegsCount++
+                if (j !== 0 && i !== 0 && gBoard[i - 1][j - 1].isMine) minesNegsCount++
+                if (i !== 0 && gBoard[i - 1][j].isMine) minesNegsCount++
+                if (i !== 0 && j !== (gBoard[i].length - 1) && gBoard[i - 1][j + 1].isMine) minesNegsCount++
+                gBoard[i][j].minesAroundCount = minesNegsCount
             }
         }
     }
-    return board
 }
 
 function renderBoard(board) {
@@ -114,7 +112,11 @@ function cellClicked(coords) {
     if (!gGame.isOn) {
         return
     } else if (gGame.isOn) {
-        startTimer()
+        if (!gGame.secsPassed) {
+            generateMines(coords)
+            setMinesNegsCount()
+            startTimer()
+        }
         if (!cell.isShown && !cell.isMarked) {
             cell.isShown = true
             if (!cell.minesAroundCount && !cell.isMine) {
@@ -136,7 +138,9 @@ function cellRightClicked(event) {
     if (!gGame.isOn) {
         return
     } else if (gGame.isOn) {
-        startTimer()
+        if (!gGame.secsPassed) {
+            startTimer()
+        }
         var cellCoords = event.target.id.split('-')
         var cell = gBoard[cellCoords[0]][cellCoords[1]]
         if (!cell.isMarked && !cell.isShown) {
@@ -190,14 +194,13 @@ function checkGameOver() {
 }
 
 function startTimer() {
-    if (!gGame.secsPassed) {
+    gGame.secsPassed++
+    renderTimer()
+    gTimer = setInterval(() => {
         gGame.secsPassed++
         renderTimer()
-        gTimer = setInterval(() => {
-            gGame.secsPassed++
-            renderTimer()
-        }, 1000)
-    }
+    }, 1000)
+
 }
 
 function getCoords(id) {
