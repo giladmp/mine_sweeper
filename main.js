@@ -18,22 +18,19 @@ var gGame = {
 }
 
 function initGame() {
-    clearInterval(gTimer)
-    gGame.secsPassed = 0
+    clearPrevGame()
     renderTimer()
-    gGame.markedCount = gLevel.mines
     renderFlagsCounter()
-    clearTexts()
-    gGame.isOn = true
-    adjustCellsPerRow()
     buildBoard(gLevel.size)
     renderBoard(gBoard)
+    gGame.isOn = true
 }
 
-function adjustCellsPerRow() {
-    var elBoard = document.querySelector('.board-container')
-    elBoard.style.setProperty('--row-size', gLevel.size)
-    elBoard.style.setProperty('--col-size', gLevel.size)
+function clearPrevGame() {
+    clearInterval(gTimer)
+    gGame.secsPassed = 0
+    gGame.markedCount = gLevel.mines
+    clearTexts()
 }
 
 function buildBoard(size) {
@@ -51,7 +48,14 @@ function buildBoard(size) {
             board[i].push(cell)
         }
     }
+    adjustCellsPerRow()
     gBoard = board
+}
+
+function adjustCellsPerRow() {
+    var elBoard = document.querySelector('.board-container')
+    elBoard.style.setProperty('--row-size', gLevel.size)
+    elBoard.style.setProperty('--col-size', gLevel.size)
 }
 
 function generateMines(coords) {
@@ -268,7 +272,7 @@ function showAllMines() {
             if (gBoard[i][j].isMine) {
                 gBoard[i][j].isShown = true
             }
-            if (gBoard[i][j].isMarked && !gBoard.isMine) {
+            if (gBoard[i][j].isMarked && !gBoard[i][j].isMine) {
                 gBoard[i][j].isX = true
             }
         }
