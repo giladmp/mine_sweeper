@@ -2,6 +2,7 @@
 
 const MINE = '💣'
 const FLAG = '🚩'
+const X = '❌'
 
 var gBoard
 var gTimer
@@ -58,7 +59,9 @@ function generateMines(coords) {
     while (minesCounter < gLevel.mines) {
         var i = Math.floor(Math.random() * gBoard.length)
         var j = Math.floor(Math.random() * gBoard.length)
-        if (i === coords[0] && j === coords[1]) continue
+        if (coords) {
+            if (i === coords[0] && j === coords[1]) continue
+        }
         if (!gBoard[i][j].isMine) {
             gBoard[i][j].isMine = true
             minesCounter++
@@ -113,6 +116,9 @@ function renderBoard(board) {
                 elCell.classList.add('red')
             }
             elBoard.appendChild(elCell)
+            if (board[i][j].isX) {
+                elCell.innerHTML = X
+            }
         }
     }
 }
@@ -152,22 +158,22 @@ function cellRightClicked(event) {
     } else if (gGame.isOn) {
         if (!gGame.secsPassed) {
             startTimer()
+            generateMines()
+            setMinesNegsCount()
         }
-        var cellCoords = event.target.id.split('-')
-        var cell = gBoard[cellCoords[0]][cellCoords[1]]
-        if (!cell.isMarked && !cell.isShown) {
-            cell.isMarked = true
-            gGame.markedCount--
-            renderFlagsCounter()
-            renderBoard(gBoard)
-        } else if (cell.isMarked && !cell.isShown) {
-            cell.isMarked = false
-            gGame.markedCount++
-            renderFlagsCounter()
-            renderBoard(gBoard)
-        }
-        checkGameOver()
     }
+    var cellCoords = event.target.id.split('-')
+    var cell = gBoard[cellCoords[0]][cellCoords[1]]
+    if (!cell.isMarked && !cell.isShown) {
+        cell.isMarked = true
+        gGame.markedCount--
+    } else if (cell.isMarked && !cell.isShown) {
+        cell.isMarked = false
+        gGame.markedCount++
+    }
+    renderFlagsCounter()
+    renderBoard(gBoard)
+    checkGameOver()
 }
 
 function renderFlagsCounter() {
@@ -261,6 +267,9 @@ function showAllMines() {
         for (var j = 0; j < gBoard.length; j++) {
             if (gBoard[i][j].isMine) {
                 gBoard[i][j].isShown = true
+            }
+            if (gBoard[i][j].isMarked && !gBoard.isMine) {
+                gBoard[i][j].isX = true
             }
         }
     }
